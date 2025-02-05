@@ -10,15 +10,6 @@
   "monorepo": true,
   "root": "apps/properce",
   "projects": {
-    "properce": {
-      "type": "application",
-      "root": "apps/properce",
-      "entryFile": "main",
-      "sourceRoot": "apps/properce/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/properce/tsconfig.app.json"
-      }
-    },
     "auth": {
       "type": "application",
       "root": "apps/auth",
@@ -28,13 +19,13 @@
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
     },
-    "properties": {
+    "notifications": {
       "type": "application",
-      "root": "apps/properties",
+      "root": "apps/notifications",
       "entryFile": "main",
-      "sourceRoot": "apps/properties/src",
+      "sourceRoot": "apps/notifications/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/properties/tsconfig.app.json"
+        "tsConfigPath": "apps/notifications/tsconfig.app.json"
       }
     },
     "payments": {
@@ -46,13 +37,31 @@
         "tsConfigPath": "apps/payments/tsconfig.app.json"
       }
     },
-    "notifications": {
+    "properce": {
       "type": "application",
-      "root": "apps/notifications",
+      "root": "apps/properce",
       "entryFile": "main",
-      "sourceRoot": "apps/notifications/src",
+      "sourceRoot": "apps/properce/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/notifications/tsconfig.app.json"
+        "tsConfigPath": "apps/properce/tsconfig.app.json"
+      }
+    },
+    "properties": {
+      "type": "application",
+      "root": "apps/properties",
+      "entryFile": "main",
+      "sourceRoot": "apps/properties/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/properties/tsconfig.app.json"
+      }
+    },
+    "users": {
+      "type": "application",
+      "root": "apps/users",
+      "entryFile": "main",
+      "sourceRoot": "apps/users/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/users/tsconfig.app.json"
       }
     }
   }
