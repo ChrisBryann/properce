@@ -3,7 +3,7 @@ import { User } from "apps/users/entities/user.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
-export class Notifications {
+export class Notification {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
