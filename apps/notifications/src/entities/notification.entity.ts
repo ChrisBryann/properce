@@ -1,5 +1,5 @@
 import { NotificationStatus, NotificationType } from "@app/common";
-import { User } from "apps/users/entities/user.entity";
+import { User } from "apps/users/src/entities/user.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()

@@ -27,6 +27,7 @@ export class User {
   email: string;
 
   @Column({
+    nullable: true,
     length: 255,
   })
   password: string;
@@ -84,3 +85,6 @@ export class User {
   })
   deletedAt: Date;
 }
+
+
+export type PublicUser = Omit<User, 'password'>;

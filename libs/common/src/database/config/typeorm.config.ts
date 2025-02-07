@@ -6,7 +6,7 @@ import { District } from "apps/properties/src/entities/district.entity";
 import { PropertyImage } from "apps/properties/src/entities/property-image.entity";
 import { Property } from "apps/properties/src/entities/property.entity";
 import { Province } from "apps/properties/src/entities/province.entity";
-import { User } from "apps/users/entities/user.entity";
+import { User } from "apps/users/src/entities/user.entity";
 import { config } from "dotenv";
 import { DataSource } from "typeorm";
 

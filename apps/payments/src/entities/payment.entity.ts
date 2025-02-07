@@ -1,6 +1,6 @@
 import { PaymentStatus } from '@app/common';
 import { Property } from 'apps/properties/src/entities/property.entity';
-import { User } from 'apps/users/entities/user.entity';
+import { User } from 'apps/users/src/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
