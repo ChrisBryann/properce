@@ -8,20 +8,26 @@ import { RegisterUserDto } from 'apps/auth/src/dtos/register-user.dto';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>, private readonly cryptoService: CryptoService,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   async createUser(registerUserDto: RegisterUserDto): Promise<PublicUser> {
     const user = await this.usersRepository.save({
       ...registerUserDto,
       password: await this.cryptoService.hashPassword(registerUserDto.password),
-  })
+    });
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.usersRepository.find({});
+  async getAllUsers(): Promise<PublicUser[]> {
+    const users: User[] = await this.usersRepository.find({});
+    return users.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      
+      return userWithoutPassword;
+    });
   }
 
   async getUserByEmail(

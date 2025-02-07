@@ -103,13 +103,13 @@ export class AuthService {
       tokenVersion: user.tokenVersion + 1,
     });
     
-    response.cookie('accessToken', accessToken, {
+    response.cookie('Authentication', accessToken, {
       httpOnly: true,
       expires: accessTokenExpires,
       secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
     });
 
-    response.cookie('refreshToken', refreshToken, {
+    response.cookie('Refresh', refreshToken, {
       httpOnly: true,
       expires: refreshTokenExpires,
       secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',

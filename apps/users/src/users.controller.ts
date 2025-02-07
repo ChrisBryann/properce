@@ -9,7 +9,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers(): Promise<PublicUser[]> {
     return await this.usersService.getAllUsers();
   }
 
