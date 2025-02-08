@@ -6,6 +6,7 @@ import { LocalAuthGuard } from './guards/local.guard';
 import { PublicUser, User } from 'apps/users/src/entities/user.entity';
 import { CurrentUserDecorator } from './decorators/current-user.decorator';
 import { Response } from 'express';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('auth')
 export class AuthController {
@@ -16,15 +17,20 @@ export class AuthController {
     return this.authService.getHello();
   }
 
-  @Post('/register')
+  @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto): Promise<PublicUser> {
     return await this.authService.register(registerUserDto);
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('/login')
+  @Post('login')
   async login(@CurrentUserDecorator() user: PublicUser, @Res({passthrough: true}) response: Response) {
     await this.authService.login(user, response);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @MessagePattern('validate_user')
+  async validateUser(@CurrentUserDecorator() user: PublicUser) {
+    return user;
+  }
 }

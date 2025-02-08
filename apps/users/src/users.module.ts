@@ -6,6 +6,7 @@ import { DatabaseModule } from '@app/common/database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CryptoModule } from '@app/common/crypto/crypto.module';
+import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CryptoModule } from '@app/common/crypto/crypto.module';
     DatabaseModule,
     TypeOrmModule.forFeature([User]),
     CryptoModule,
+    AuthGatewayModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
