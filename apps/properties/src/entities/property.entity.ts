@@ -10,6 +10,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Province } from './province.entity';
+import { City } from './city.entity';
+import { District } from './district.entity';
 
 @Entity()
 export class Property {
@@ -25,21 +28,18 @@ export class Property {
     type: 'enum',
     enum: PropertyType,
   })
-  type: string;
+  type: PropertyType;
 
-  @Column({
-    length: 100,
-  })
+  @ManyToOne((type) => Province)
+  @JoinColumn()
   province: string;
 
-  @Column({
-    length: 100,
-  })
+  @ManyToOne((type) => City)
+  @JoinColumn()
   city: string;
 
-  @Column({
-    length: 100,
-  })
+  @ManyToOne((type) => District)
+  @JoinColumn()
   district: string;
 
   @Column({
