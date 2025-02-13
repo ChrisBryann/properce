@@ -1,11 +1,9 @@
 import { ConfigService } from "@nestjs/config";
+import { ProductListing } from "apps/listings/src/entities/product-listing.entity";
+import { Product } from "apps/listings/src/products/entities/product.entity";
 import { Notification } from "apps/notifications/src/entities/notification.entity";
+import { Order } from "apps/orders/src/entities/order.entity";
 import { Payment } from "apps/payments/src/entities/payment.entity";
-import { City } from "apps/properties/src/entities/city.entity";
-import { District } from "apps/properties/src/entities/district.entity";
-import { PropertyImage } from "apps/properties/src/entities/property-image.entity";
-import { Property } from "apps/properties/src/entities/property.entity";
-import { Province } from "apps/properties/src/entities/province.entity";
 import { User } from "apps/users/src/entities/user.entity";
 import { config } from "dotenv";
 import { DataSource } from "typeorm";
@@ -27,7 +25,7 @@ const AppDataSource = new DataSource({
     entities:
     configService.getOrThrow('NODE_ENV') === "production"
       ? ["dist/entities/**/*.js"]
-      : [User, Property, PropertyImage, Province, City, District, Payment, Notification],
+      : [User, Product, ProductListing, Payment, Order, Notification],
   migrations:
   configService.getOrThrow('NODE_ENV') === "production"
       ? ["dist/migrations/**/*.js"]

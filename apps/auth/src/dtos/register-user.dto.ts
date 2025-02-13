@@ -14,7 +14,7 @@ export class RegisterUserDto {
     password: string;
     
     @IsString()
-    @IsPhoneNumber('ID')
+    @IsPhoneNumber('US')
     phone: string;
 
     @IsString()

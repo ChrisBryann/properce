@@ -6,7 +6,7 @@ export class UpdateUserDto {
     name: string;
 
     @IsString()
-    @IsPhoneNumber('ID')
+    @IsPhoneNumber('US')
     phone: string;
     
     @IsString()

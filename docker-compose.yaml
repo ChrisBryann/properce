@@ -1,41 +1,54 @@
 version: '3.8'
 
 services:
-  auth:
+  orders:
     build:
       context: .
-      dockerfile: ./apps/auth/Dockerfile
+      dockerfile: ./apps/orders/Dockerfile
       target: development
-    container_name: auth
-    command: npm run start:dev auth
+    container_name: orders
+    command: npm run start:dev orders
     env_file:
-      - ./apps/auth/.env.development
+      - ./apps/orders/.env.development
+    ports:
+      - 3106:3000
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    depends_on:
+      - auth
+  commitments:
+    build:
+      context: .
+      dockerfile: ./apps/commitments/Dockerfile
+      target: development
+    container_name: commitments
+    command: npm run start:dev commitments
+    env_file:
+      - ./apps/commitments/.env.development
+    ports:
+      - 3105:3000
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    depends_on:
+      - auth
+  listings:
+    build:
+      context: .
+      dockerfile: ./apps/listings/Dockerfile
+      target: development
+    container_name: listings
+    command: npm run start:dev listings
+    env_file:
+      - ./apps/listings/.env.development
     ports:
       - 3104:3000
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
     depends_on:
-      - users
-  properties:
-    build:
-      context: .
-      dockerfile: ./apps/properties/Dockerfile
-      target: development
-    container_name: properties
-    command: npm run start:dev properties
-    env_file:
-      - ./apps/properties/.env.development
-    ports:
-      - 3103:3000
-    volumes:
-      - .:/usr/src/app
-      - node_modules:/usr/src/app/node_modules
-    depends_on:
-      - db
-      - pgadmin
-      - rabbitmq
-      - bullmq
+      - auth
   payments:
     build:
       context: .
@@ -46,15 +59,12 @@ services:
     env_file:
       - ./apps/payments/.env.development
     ports:
-      - 3102:3000
+      - 3103:3000
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
     depends_on:
-      - db
-      - pgadmin
-      - rabbitmq
-      - bullmq
+      - auth
   notifications:
     build:
       context: .
@@ -65,15 +75,28 @@ services:
     env_file:
       - ./apps/notifications/.env.development
     ports:
+      - 3102:3000
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    depends_on:
+      - auth
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    container_name: auth
+    command: npm run start:dev auth
+    env_file:
+      - ./apps/auth/.env.development
+    ports:
       - 3101:3000
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
     depends_on:
-      - db
-      - pgadmin
-      - rabbitmq
-      - bullmq
+      - users
   users:
     build:
       context: .

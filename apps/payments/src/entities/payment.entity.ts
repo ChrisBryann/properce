@@ -1,6 +1,5 @@
 import { PaymentStatus } from '@app/common';
-import { Property } from 'apps/properties/src/entities/property.entity';
-import { User } from 'apps/users/src/entities/user.entity';
+import { Order } from 'apps/orders/src/entities/order.entity';
 import {
   Column,
   CreateDateColumn,
@@ -21,24 +20,20 @@ export class Payment {
     unique: true,
     length: 255,
   })
-  invoice_id: string; // Xendit invoice ID
+  invoiceId: string; // Xendit invoice ID
 
-  @ManyToOne(() => Property, {
+  @ManyToOne(() => Order, {
     onDelete: 'SET NULL',
+    nullable: false,
   })
   @JoinColumn()
-  propertyId: string;
-
-  @ManyToOne(() => User, {
-    onDelete: 'SET NULL',
-  })
-  @JoinColumn()
-  buyerId: string;
+  order: Order;
 
   @Column({
     type: 'numeric',
     precision: 15,
     scale: 2,
+    nullable: false,
   })
   amount: number;
 
@@ -53,11 +48,6 @@ export class Payment {
     length: 50,
   })
   paymentChannel: string; // OVO, Bank Transfer, Alfamart
-
-  @Column({
-    default: false,
-  })
-  isSyariah: boolean;
 
   @CreateDateColumn({
     type: 'timestamp',
