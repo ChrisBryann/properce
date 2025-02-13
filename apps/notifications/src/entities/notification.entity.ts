@@ -1,52 +1,33 @@
-import { NotificationStatus, NotificationType } from "@app/common";
-import { User } from "apps/users/src/entities/user.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { NotificationStatus, NotificationType } from '@app/common';
+import { DefaultEntity } from '@app/common/database/default.entity';
+import { User } from 'apps/users/src/entities/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Notification {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+export class Notification extends DefaultEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @ManyToOne(() => User, {
-        onDelete: 'CASCADE',
-    })
-    userId: string;
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+  })
+  userId: string;
 
-    @Column({
-        type: 'enum',
-        enum: NotificationType,
-    })
-    type: NotificationType;
+  @Column({
+    type: 'enum',
+    enum: NotificationType,
+  })
+  type: NotificationType;
 
-    @Column({
-        type: 'text'
-    })
-    content: string;
+  @Column({
+    type: 'text',
+  })
+  content: string;
 
-    @Column({
-        type: 'enum',
-        enum: NotificationStatus,
-        default: NotificationStatus.Pending,
-    })
-    status: NotificationStatus;
-
-    @CreateDateColumn({
-        type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP(6)',
-      })
-      createdAt: Date;
-    
-      @UpdateDateColumn({
-        type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP(6)',
-        onUpdate: 'CURRENT_TIMESTAMP(6)',
-      })
-      updatedAt: Date;
-    
-      @DeleteDateColumn({
-        type: 'timestamp',
-        default: null, // cannot have a default value since it will causepostgres to assume it has been deleted
-        onUpdate: 'CURRENT_TIMESTAMP(6)',
-      })
-      deletedAt: Date;
+  @Column({
+    type: 'enum',
+    enum: NotificationStatus,
+    default: NotificationStatus.Pending,
+  })
+  status: NotificationStatus;
 }

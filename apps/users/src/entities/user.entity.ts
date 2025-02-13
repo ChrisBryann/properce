@@ -1,17 +1,15 @@
 import { UserRoles } from '@app/common';
+import { DefaultEntity } from '@app/common/database/default.entity';
 import {
   Column,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   Index,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 @Index(['phone', 'email', 'id'], { unique: true })
-export class User {
+export class User extends DefaultEntity{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -38,10 +36,10 @@ export class User {
   })
   role: UserRoles;
 
-  @Column({
-    default: false,
-  })
-  ktpVerified: boolean;
+  // @Column({
+  //   default: false,
+  // })
+  // ktpVerified: boolean;
 
   @Column({
     default: false,
@@ -64,26 +62,6 @@ export class User {
     nullable: true,
   })
   refreshToken?: string;
-
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)',
-    onUpdate: 'CURRENT_TIMESTAMP(6)',
-  })
-  updatedAt: Date;
-
-  @DeleteDateColumn({
-    type: 'timestamp',
-    default: null, // cannot have a default value since it will cause postgres to assume it has been deleted
-    onUpdate: 'CURRENT_TIMESTAMP(6)',
-  })
-  deletedAt: Date;
 }
 
 

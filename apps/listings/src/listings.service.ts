@@ -61,8 +61,17 @@ export class ListingsService {
   }
 
   async findOne(sellerId: string, id: string) {
-    const productListing = await this.productListingRepository.findOneBy({
-      id,
+    const productListing = await this.productListingRepository.findOne({
+      where: {
+        id,
+      },
+      select: {
+        product: {
+          seller: {
+            id: true,
+          },
+        },
+      },
     });
 
     if (!productListing) {
