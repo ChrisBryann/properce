@@ -42,6 +42,7 @@ export class ProductListing {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        nullable: true,
     })
     finalPrice?: string;
 

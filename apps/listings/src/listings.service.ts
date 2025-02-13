@@ -21,19 +21,18 @@ export class ListingsService {
     // find the product from productId and confirm if it's from the same seller
     try {
       await this.productService.findOne(sellerId, createListingDto.productId);
-    }catch(error) {
+    } catch (error) {
       throw new ForbiddenException(
         'Product in this listing does not belong to this seller!',
       );
     }
 
-    const productListing =
-      this.productListingRepository.create({
-        ...createListingDto,
-        product: {
-          id: createListingDto.productId,
-        },
-      });
+    const productListing = this.productListingRepository.create({
+      ...createListingDto,
+      product: {
+        id: createListingDto.productId,
+      },
+    });
     return await this.productListingRepository.save(productListing);
   }
 
@@ -43,6 +42,13 @@ export class ListingsService {
         product: {
           seller: {
             id: sellerId,
+          },
+        },
+      },
+      select: {
+        product: {
+          seller: {
+            id: true,
           },
         },
       },
@@ -89,7 +95,7 @@ export class ListingsService {
           product: {
             id: updateListingDto.productId,
           },
-        })
+        }),
       },
     );
   }
@@ -99,7 +105,7 @@ export class ListingsService {
       await this.findOne(sellerId, id),
     );
   }
-  
+
   getHello(): string {
     return 'Hello World!';
   }

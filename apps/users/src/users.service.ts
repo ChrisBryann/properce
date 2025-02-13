@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PublicUser, User } from './entities/user.entity';
 import { DeepPartial, Repository } from 'typeorm';
@@ -13,19 +17,27 @@ export class UsersService {
   ) {}
 
   async createUser(registerUserDto: RegisterUserDto): Promise<PublicUser> {
-    const user = await this.usersRepository.save({
-      ...registerUserDto,
-      password: await this.cryptoService.hashPassword(registerUserDto.password),
-    });
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    try {
+      const registeredUser = await this.getUserByEmail(registerUserDto.email);
+      console.log(registeredUser);
+    } catch (error) {
+      const user = await this.usersRepository.save({
+        ...registerUserDto,
+        password: await this.cryptoService.hashPassword(
+          registerUserDto.password,
+        ),
+      });
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    }
+    throw new ForbiddenException('User already exist!');
   }
 
   async getAllUsers(): Promise<PublicUser[]> {
     const users: User[] = await this.usersRepository.find({});
     return users.map((user) => {
       const { password, ...userWithoutPassword } = user;
-      
+
       return userWithoutPassword;
     });
   }
@@ -36,7 +48,7 @@ export class UsersService {
   ): Promise<User | PublicUser> {
     const user = await this.usersRepository.findOneBy({ email });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('User not found!');
     }
     const { password, ...userWithoutPassword } = user;
     return includePassword ? user : userWithoutPassword;
@@ -60,7 +72,7 @@ export class UsersService {
   ): Promise<PublicUser> {
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('User not found!');
     }
     const { password, ...updatedUser } = await this.usersRepository.save({
       id: userId,
@@ -72,7 +84,7 @@ export class UsersService {
   async deleteUserById(userId: string): Promise<void> {
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('User not found!');
     }
     await this.usersRepository.remove(user);
   }

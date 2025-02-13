@@ -28,6 +28,11 @@ export class ProductsService {
           id: sellerId,
         },
       },
+      select: {
+        seller: {
+          id: true,
+        },
+      },
       relations: {
         seller: true,
       },
@@ -40,6 +45,11 @@ export class ProductsService {
         id,
         seller: {
           id: sellerId,
+        },
+      },
+      select: {
+        seller: {
+          id: true,
         },
       },
       relations: {
@@ -61,12 +71,14 @@ export class ProductsService {
   ) {
     await this.findOne(sellerId, id);
 
-    return await this.productRepository.update(
+    await this.productRepository.update(
       {
         id,
       },
       updateProductDto,
     );
+
+    return await this.findOne(sellerId, id);
   }
 
   async remove(sellerId: string, id: string) {
