@@ -4,7 +4,7 @@ import { User } from "apps/users/src/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Commitment extends DefaultEntity{
+export class Commitment extends DefaultEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 

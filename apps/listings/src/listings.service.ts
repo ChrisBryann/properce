@@ -9,6 +9,9 @@ import { Repository } from 'typeorm';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { ProductsService } from './products/products.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { LISTING_BMQ } from '@app/common/bullmq/bullmq.constant';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class ListingsService {
@@ -16,6 +19,7 @@ export class ListingsService {
     @InjectRepository(ProductListing)
     private readonly productListingRepository: Repository<ProductListing>,
     private readonly productService: ProductsService,
+    @InjectQueue(LISTING_BMQ) private readonly listingQueue: Queue,
   ) {}
   async create(sellerId: string, createListingDto: CreateListingDto) {
     // find the product from productId and confirm if it's from the same seller
@@ -27,18 +31,33 @@ export class ListingsService {
       );
     }
 
-    const productListing = this.productListingRepository.create({
+    const listing = this.productListingRepository.create({
       ...createListingDto,
       product: {
         id: createListingDto.productId,
       },
     });
-    return await this.productListingRepository.save(productListing);
+    // send out an event to queue to close the listing when deadline is met
+    await this.listingQueue.add(
+      'closeListing',
+      {
+        id: listing.id,
+        sellerId,
+      },
+      {
+        delay: listing.deadline.getTime() - Date.now(),
+        jobId: listing.id,
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    );
+    return await this.productListingRepository.save(listing);
   }
 
   async findAll(sellerId: string) {
     return await this.productListingRepository.find({
       where: {
+        expired: false,
         product: {
           seller: {
             id: sellerId,
@@ -60,10 +79,11 @@ export class ListingsService {
     });
   }
 
-  async findOne(sellerId: string, id: string) {
-    const productListing = await this.productListingRepository.findOne({
+  async findOne(id: string) {
+    const listing = await this.productListingRepository.findOne({
       where: {
         id,
+        expired: false,
       },
       select: {
         product: {
@@ -74,17 +94,17 @@ export class ListingsService {
       },
     });
 
-    if (!productListing) {
+    if (!listing) {
       throw new NotFoundException('Product listing does not exist!');
     }
 
-    if (productListing.product.seller.id !== sellerId) {
-      throw new ForbiddenException(
-        'Product in this listing does not belong to this seller!',
-      );
-    }
+    // if (listing.product.seller.id !== sellerId) {
+    //   throw new ForbiddenException(
+    //     'Product in this listing does not belong to this seller!',
+    //   );
+    // }
 
-    return productListing;
+    return listing;
   }
 
   async update(
@@ -92,7 +112,7 @@ export class ListingsService {
     id: string,
     updateListingDto: UpdateListingDto,
   ) {
-    await this.findOne(sellerId, id);
+    await this.findOne(id);
 
     return await this.productListingRepository.update(
       {
@@ -110,8 +130,40 @@ export class ListingsService {
   }
 
   async remove(sellerId: string, id: string) {
-    await this.productListingRepository.remove(
-      await this.findOne(sellerId, id),
+    const listing = await this.findOne(id);
+    if (listing.product.seller.id !== sellerId) {
+      throw new ForbiddenException(
+        'This listing does not belong to this seller!',
+      );
+    }
+    const job = await this.listingQueue.getJob(id);
+    await job?.remove();
+    await this.productListingRepository.remove(listing);
+  }
+
+  async closeListing(sellerId: string, id: string) {
+    await this.listingQueue.add(
+      'closeListing',
+      {
+        id,
+        sellerId,
+      },
+      {
+        jobId: id,
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    );
+  }
+
+  async closeExpiredListing(id: string) {
+    await this.productListingRepository.update(
+      {
+        id,
+      },
+      {
+        expired: true,
+      },
     );
   }
 

@@ -1,4 +1,5 @@
 import { ConfigService } from "@nestjs/config";
+import { Commitment } from "apps/commitments/src/entities/commitment.entity";
 import { ProductListing } from "apps/listings/src/entities/product-listing.entity";
 import { Product } from "apps/listings/src/products/entities/product.entity";
 import { Notification } from "apps/notifications/src/entities/notification.entity";
@@ -25,7 +26,7 @@ const AppDataSource = new DataSource({
     entities:
     configService.getOrThrow('NODE_ENV') === "production"
       ? ["dist/entities/**/*.js"]
-      : [User, Product, ProductListing, Payment, Order, Notification],
+      : [User, Product, ProductListing, Payment, Order, Commitment, Notification],
   migrations:
   configService.getOrThrow('NODE_ENV') === "production"
       ? ["dist/migrations/**/*.js"]

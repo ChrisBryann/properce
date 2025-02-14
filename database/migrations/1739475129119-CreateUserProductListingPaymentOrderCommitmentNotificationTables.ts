@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class CreateUserProductListingPaymentOrderNotificationTables1739471968817 implements MigrationInterface {
-    name = 'CreateUserProductListingPaymentOrderNotificationTables1739471968817'
+export class CreateUserProductListingPaymentOrderCommitmentNotificationTables1739475129119 implements MigrationInterface {
+    name = 'CreateUserProductListingPaymentOrderCommitmentNotificationTables1739475129119'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."user_role_enum" AS ENUM('buyer', 'seller', 'admin')`);
@@ -9,7 +9,8 @@ export class CreateUserProductListingPaymentOrderNotificationTables1739471968817
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_2719e95bc6f61fababbfa6d05c" ON "user" ("phone", "email", "id") `);
         await queryRunner.query(`CREATE TYPE "public"."product_condition_enum" AS ENUM('new', 'like_new', 'used', 'refurbished')`);
         await queryRunner.query(`CREATE TABLE "product" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying(255) NOT NULL, "description" text NOT NULL, "category" character varying(100) NOT NULL, "condition" "public"."product_condition_enum" NOT NULL, "sellerId" uuid NOT NULL, CONSTRAINT "PK_bebc9158e480b949565b4dc7a82" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "product_listing" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "proposedPrice" numeric(10,2) NOT NULL, "minThreshold" integer NOT NULL, "deadline" TIMESTAMP NOT NULL, "locked" boolean NOT NULL DEFAULT false, "finalPrice" numeric(10,2), "productId" uuid NOT NULL, CONSTRAINT "PK_cc64c972fd68c6bce3f9a5b1273" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "product_listing" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "proposedPrice" numeric(10,2) NOT NULL, "minThreshold" integer NOT NULL, "deadline" TIMESTAMP NOT NULL, "locked" boolean NOT NULL DEFAULT false, "finalPrice" numeric(10,2), "expired" boolean NOT NULL DEFAULT false, "productId" uuid NOT NULL, CONSTRAINT "PK_cc64c972fd68c6bce3f9a5b1273" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "commitment" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "quantity" integer NOT NULL, "listingId" uuid NOT NULL, "buyerId" uuid NOT NULL, CONSTRAINT "PK_7a0899978d100f72269b3045d7e" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."notification_type_enum" AS ENUM('sms', 'email', 'whatsapp', 'in_app')`);
         await queryRunner.query(`CREATE TYPE "public"."notification_status_enum" AS ENUM('sent', 'failed', 'pending')`);
         await queryRunner.query(`CREATE TABLE "notification" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "type" "public"."notification_type_enum" NOT NULL, "content" text NOT NULL, "status" "public"."notification_status_enum" NOT NULL DEFAULT 'pending', "userIdId" uuid, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`);
@@ -19,6 +20,8 @@ export class CreateUserProductListingPaymentOrderNotificationTables1739471968817
         await queryRunner.query(`CREATE TABLE "payment" ("createdAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "updatedAt" TIMESTAMP NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone, "deletedAt" TIMESTAMP, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "invoiceId" character varying(255) NOT NULL, "amount" numeric(15,2) NOT NULL, "status" "public"."payment_status_enum" NOT NULL DEFAULT 'pending', "paymentChannel" character varying(50) NOT NULL, "orderId" uuid NOT NULL, CONSTRAINT "UQ_87223c7f1d4c2ca51cf69927844" UNIQUE ("invoiceId"), CONSTRAINT "PK_fcaec7df5adf9cac408c686b2ab" PRIMARY KEY ("id"))`);
         await queryRunner.query(`ALTER TABLE "product" ADD CONSTRAINT "FK_d5cac481d22dacaf4d53f900a3f" FOREIGN KEY ("sellerId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "product_listing" ADD CONSTRAINT "FK_275a4d6f43adcee5122987f9f68" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "commitment" ADD CONSTRAINT "FK_e3a3c661dfc12dd8efba5a3f7d4" FOREIGN KEY ("listingId") REFERENCES "product_listing"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "commitment" ADD CONSTRAINT "FK_75d9075d40f82bfae1117c58305" FOREIGN KEY ("buyerId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "notification" ADD CONSTRAINT "FK_12b3b30c2d4e21dc186cff3afaa" FOREIGN KEY ("userIdId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "order" ADD CONSTRAINT "FK_3696f51d40889191dab4755f0fe" FOREIGN KEY ("listingId") REFERENCES "product_listing"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "order" ADD CONSTRAINT "FK_20981b2b68bf03393c44dd1b9d7" FOREIGN KEY ("buyerId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
@@ -30,6 +33,8 @@ export class CreateUserProductListingPaymentOrderNotificationTables1739471968817
         await queryRunner.query(`ALTER TABLE "order" DROP CONSTRAINT "FK_20981b2b68bf03393c44dd1b9d7"`);
         await queryRunner.query(`ALTER TABLE "order" DROP CONSTRAINT "FK_3696f51d40889191dab4755f0fe"`);
         await queryRunner.query(`ALTER TABLE "notification" DROP CONSTRAINT "FK_12b3b30c2d4e21dc186cff3afaa"`);
+        await queryRunner.query(`ALTER TABLE "commitment" DROP CONSTRAINT "FK_75d9075d40f82bfae1117c58305"`);
+        await queryRunner.query(`ALTER TABLE "commitment" DROP CONSTRAINT "FK_e3a3c661dfc12dd8efba5a3f7d4"`);
         await queryRunner.query(`ALTER TABLE "product_listing" DROP CONSTRAINT "FK_275a4d6f43adcee5122987f9f68"`);
         await queryRunner.query(`ALTER TABLE "product" DROP CONSTRAINT "FK_d5cac481d22dacaf4d53f900a3f"`);
         await queryRunner.query(`DROP TABLE "payment"`);
@@ -39,6 +44,7 @@ export class CreateUserProductListingPaymentOrderNotificationTables1739471968817
         await queryRunner.query(`DROP TABLE "notification"`);
         await queryRunner.query(`DROP TYPE "public"."notification_status_enum"`);
         await queryRunner.query(`DROP TYPE "public"."notification_type_enum"`);
+        await queryRunner.query(`DROP TABLE "commitment"`);
         await queryRunner.query(`DROP TABLE "product_listing"`);
         await queryRunner.query(`DROP TABLE "product"`);
         await queryRunner.query(`DROP TYPE "public"."product_condition_enum"`);

@@ -52,4 +52,10 @@ export class ProductListing extends DefaultEntity {
     nullable: true,
   })
   finalPrice?: string;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  expired: boolean; // indicates if listing has gone over deadline and minThreshold was not met
 }

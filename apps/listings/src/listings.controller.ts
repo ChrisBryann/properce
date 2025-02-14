@@ -17,27 +17,32 @@ export class ListingsController {
   }
 
   @Post()
-  create(@CurrentUserDecorator() user: PublicUser, @Body() createListingDto: CreateListingDto) {
-    return this.listingsService.create(user.id, createListingDto);
+  async create(@CurrentUserDecorator() user: PublicUser, @Body() createListingDto: CreateListingDto) {
+    return await this.listingsService.create(user.id, createListingDto);
   }
 
   @Get()
-  findAll(@CurrentUserDecorator() user: PublicUser) {
-    return this.listingsService.findAll(user.id);
+  async findAll(@CurrentUserDecorator() user: PublicUser) {
+    return await this.listingsService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
-    return this.listingsService.findOne(user.id, id);
+  async findOne(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
+    return await this.listingsService.findOne(id);
   }
 
   @Put(':id')
-  update(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string, @Body() updateListingDto: UpdateListingDto) {
-    return this.listingsService.update(user.id, id, updateListingDto);
+  async update(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string, @Body() updateListingDto: UpdateListingDto) {
+    return await this.listingsService.update(user.id, id, updateListingDto);
   }
 
   @Delete(':id')
-  remove(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
-    return this.listingsService.remove(user.id, id);
+  async remove(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
+    return await this.listingsService.remove(user.id, id);
+  }
+
+  @Put(':id/close')
+  async closeListing(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
+    await this.listingsService.closeListing(user.id, id);
   }
 }

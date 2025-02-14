@@ -1,0 +1,1 @@
+export const LISTING_BMQ = 'listings_queue'

@@ -1,8 +1,9 @@
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateListingDto {
 
     @IsString()
+    @IsUUID()
     @IsNotEmpty()
     productId: string;
 

@@ -6,6 +6,8 @@ import { DatabaseModule } from '@app/common/database/database.module';
 import { ProductListing } from './entities/product-listing.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { BmqModule } from '@app/common/bullmq/bullmq.module';
+import { LISTING_BMQ } from '@app/common/bullmq/bullmq.constant';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     ProductsModule,
     DatabaseModule,
+    BmqModule.register([LISTING_BMQ]),
     TypeOrmModule.forFeature([ProductListing]),
   ],
   controllers: [ListingsController],
