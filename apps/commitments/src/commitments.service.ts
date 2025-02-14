@@ -47,46 +47,64 @@ export class CommitmentsService {
     });
   }
 
-  async findAllByListingId(sellerId: string, listingId: string, excludeListing = true) {
+  async findAllByListingId(
+    sellerId: string,
+    listingId: string,
+    includeListing = false,
+  ) {
     // find all commitments that are tied to the seller's listing
-    return await this.commitmentRepository.find({
-      where: {
-        listing: {
-          id: listingId,
-          product: {
-            seller: {
-              id: sellerId,
-            },
-          },
-        },
-      },
-      select: {
-        buyer: {
-          id: true,
-        },
-        listing: {
-          id: excludeListing,
-          product: {
-            seller: {
-              id: true,
-            },
-          },
-        },
-      },
-      relations: {
-        buyer: true,
-        listing: true,
-      },
-    });
+    // return await this.commitmentRepository.find({
+    //   where: {
+    //     listing: {
+    //       id: listingId,
+    //       product: {
+    //         seller: {
+    //           id: sellerId,
+    //         },
+    //       },
+    //     },
+    //   },
+    //   select: {
+    //     buyer: {
+    //       id: true,
+    //     },
+    //     listing: includeListing && {
+    //       id: true,
+    //       product: {
+    //         seller: {
+    //           id: true,
+    //         },
+    //       },
+    //     },
+    //   },
+    //   relations: {
+    //     buyer: true,
+    //     listing: true,
+    //   },
+    // });
+    return await this.commitmentRepository
+      .createQueryBuilder('commitment')
+      .leftJoinAndSelect('commitment.listing', 'listing')
+      .leftJoinAndSelect('listing.product', 'product')
+      // Join seller, but don't use leftJoinAndSelect for seller so we can limit its fields
+      .leftJoin('product.seller', 'seller')
+      .addSelect('seller.id')
+      .where('listing.id = :id', { id: listingId })
+      .andWhere('seller.id = :id', { id: sellerId })
+      .getMany();
   }
 
   async getAggregatedDataByListingId(sellerId: string, listingId: string) {
     // total quantity committed, threshold status, remaining time
-    const commitments = await this.findAllByListingId(sellerId, listingId, false);
+    const commitments = await this.findAllByListingId(
+      sellerId,
+      listingId,
+      true,
+    );
     return {
       totalCommitments: commitments.length,
       minThreshold:
-        commitments.length > 0 ? commitments[0].listing.minThreshold : 0,
+        commitments.length > 0 ? commitments[0].listing.minThreshold : 1,
       remainingTime:
         commitments.length > 0
           ? commitments[0].listing.deadline.getTime() - Date.now()
@@ -97,12 +115,16 @@ export class CommitmentsService {
   async cancelCommitment(buyerId: string, id: string) {
     const commitment = await this.findOne(id);
     if (commitment.buyer.id !== buyerId) {
-      throw new ForbiddenException('This commitment does not belong to this buyer!');
+      throw new ForbiddenException(
+        'This commitment does not belong to this buyer!',
+      );
     }
 
-    if(commitment.listing.deadline.getTime() < Date.now()){
+    if (commitment.listing.deadline.getTime() < Date.now()) {
       // this listing window has closed, so commitment must be locked
-      throw new ForbiddenException('This listing window has closed and this commitment cannot be cancelled!')
+      throw new ForbiddenException(
+        'This listing window has closed and this commitment cannot be cancelled!',
+      );
     }
     await this.commitmentRepository.remove(commitment);
   }

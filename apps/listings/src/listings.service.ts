@@ -33,6 +33,7 @@ export class ListingsService {
 
     const listing = this.productListingRepository.create({
       ...createListingDto,
+      deadline: new Date(createListingDto.deadline),
       product: {
         id: createListingDto.productId,
       },
@@ -55,44 +56,74 @@ export class ListingsService {
   }
 
   async findAll(sellerId: string) {
-    return await this.productListingRepository.find({
-      where: {
-        expired: false,
-        product: {
-          seller: {
-            id: sellerId,
-          },
-        },
-      },
-      select: {
-        product: {
-          seller: {
-            id: true,
-          },
-        },
-      },
-      relations: {
-        product: {
-          seller: true,
-        },
-      },
-    });
+    // return await this.productListingRepository.find({
+    //   where: {
+    //     expired: false,
+    //     product: {
+    //       seller: {
+    //         id: sellerId,
+    //       },
+    //     },
+    //   },
+    //   select: {
+    //     product: {
+    //       id: true,
+    //       seller: {
+    //         id: true,
+    //       },
+    //     },
+    //   },
+    //   relations: {
+    //     product: {
+    //       seller: true,
+    //     },
+    //   },
+    // });
+    return await this.productListingRepository
+      .createQueryBuilder('listing')
+      .leftJoin('listing.product', 'product')
+      .addSelect('product.id')
+      .addSelect('product.seller')
+      // Join seller, but don't use leftJoinAndSelect for seller so we can limit its fields
+      .leftJoin('product.seller', 'seller')
+      .addSelect('seller.id')
+      .where('seller.id = :id', { id: sellerId })
+      .andWhere('listing.expired = :expired', { expired: false })
+      .getMany();
   }
 
   async findOne(id: string) {
-    const listing = await this.productListingRepository.findOne({
-      where: {
-        id,
-        expired: false,
-      },
-      select: {
-        product: {
-          seller: {
-            id: true,
-          },
-        },
-      },
-    });
+    // const listing = await this.productListingRepository.findOne({
+    //   where: {
+    //     id,
+    //     expired: false,
+    //   },
+    //   select: {
+    //     product: {
+    //       id: true,
+    //       seller: {
+    //         id: true,
+    //       },
+    //     },
+    //   },
+    //   relations: {
+    //     product: {
+    //       seller: true,
+    //     },
+    //   },
+    // });
+
+    const listing = await this.productListingRepository
+      .createQueryBuilder('listing')
+      .leftJoin('listing.product', 'product')
+      .addSelect('product.id')
+      .addSelect('product.seller')
+      // Join seller, but don't use leftJoinAndSelect for seller so we can limit its fields
+      .leftJoin('product.seller', 'seller')
+      .addSelect('seller.id')
+      .where('listing.id = :id', { id })
+      .andWhere('listing.expired = :expired', { expired: false })
+      .getOne();
 
     if (!listing) {
       throw new NotFoundException('Product listing does not exist!');

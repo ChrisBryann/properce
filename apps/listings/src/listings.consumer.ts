@@ -8,7 +8,10 @@ import { CommitmentsService } from 'apps/commitments/src/commitments.service';
 @Processor(LISTING_BMQ)
 export class ListingConsumer extends WorkerHost {
   private readonly logger: Logger = new Logger(ListingConsumer.name);
-  constructor(private readonly listingService: ListingsService, private readonly commitmentsService: CommitmentsService) {
+  constructor(
+    private readonly listingService: ListingsService,
+    private readonly commitmentsService: CommitmentsService,
+  ) {
     super();
   }
 
@@ -21,14 +24,20 @@ export class ListingConsumer extends WorkerHost {
 
         const { id: productId, sellerId } = job.data;
         // find out if this listing totalCommitment >= minThreshold
-        const aggregatedCommitmentData = await this.commitmentsService.getAggregatedDataByListingId(sellerId, productId)
-        if(aggregatedCommitmentData.totalCommitments >= aggregatedCommitmentData.minThreshold) {
-            // send out an order job event for creating the order (order bulk)
-        }else {
-            // mark this listing as expired
-            await this.listingService.closeExpiredListing(productId);
+        const aggregatedCommitmentData =
+          await this.commitmentsService.getAggregatedDataByListingId(
+            sellerId,
+            productId,
+          );
+        if (
+          aggregatedCommitmentData.totalCommitments >=
+          aggregatedCommitmentData.minThreshold
+        ) {
+          // send out an order job event for creating the order (order bulk)
+        } else {
+          // mark this listing as expired
+          await this.listingService.closeExpiredListing(productId);
         }
-        
 
         return {};
       }
@@ -41,21 +50,21 @@ export class ListingConsumer extends WorkerHost {
   @OnWorkerEvent('active')
   onActive(job: Job) {
     this.logger.log(
-      `Processing job ${job.id} of type ${job.name} with data ${job.data}...`,
+      `Processing job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data)}...`,
     );
   }
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job) {
     this.logger.log(
-      `Completed job ${job.id} of type ${job.name} with data ${job.data}...`,
+      `Completed job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data)}...`,
     );
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job, error: any) {
     this.logger.log(
-      `Job ${job.id} of type ${job.name} with data ${job.data} has failed.\nError details: ${JSON.stringify(error)}`,
+      `Job ${job.id} of type ${job.name} with data ${JSON.stringify(job.data)} has failed.\nError details: ${JSON.stringify(error)}`,
     );
   }
 
