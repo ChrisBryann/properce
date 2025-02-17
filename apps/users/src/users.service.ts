@@ -19,7 +19,6 @@ export class UsersService {
   async createUser(registerUserDto: RegisterUserDto): Promise<PublicUser> {
     try {
       const registeredUser = await this.getUserByEmail(registerUserDto.email);
-      console.log(registeredUser);
     } catch (error) {
       const user = await this.usersRepository.save({
         ...registerUserDto,

@@ -6,26 +6,28 @@ import { LocalAuthGuard } from './guards/local.guard';
 import { PublicUser, User } from 'apps/users/src/entities/user.entity';
 import { CurrentUserDecorator } from './decorators/current-user.decorator';
 import { Response } from 'express';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get()
+  @MessagePattern({ cmd: 'getHello' })
   getHello(): string {
     return this.authService.getHello();
   }
 
-  @Post('register')
-  async register(@Body() registerUserDto: RegisterUserDto): Promise<PublicUser> {
+  @MessagePattern({ cmd: 'register' })
+  async register(
+    @Payload() registerUserDto: RegisterUserDto,
+  ): Promise<PublicUser> {
     return await this.authService.register(registerUserDto);
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@CurrentUserDecorator() user: PublicUser, @Res({passthrough: true}) response: Response) {
-    await this.authService.login(user, response);
+  @MessagePattern({ cmd: 'login' })
+  async login(@CurrentUserDecorator() user: PublicUser) {
+    return await this.authService.login(user);
   }
 
   @UseGuards(JwtAuthGuard)

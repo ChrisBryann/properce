@@ -20,10 +20,7 @@ export class AuthService {
     return 'Hello World!';
   }
 
-  async verifyUser(
-    email: string,
-    password: string,
-  ): Promise<PublicUser> {
+  async verifyUser(email: string, password: string): Promise<PublicUser> {
     const { password: userPassword, ...user } =
       (await this.usersService.getUserByEmail(email, true)) as User;
     const authenticated = await this.cryptoService.validatePassword(
@@ -36,8 +33,11 @@ export class AuthService {
     return user;
   }
 
-  async verifyUserRefreshToken(id: string, refreshToken: string): Promise<PublicUser> {
-    const user = await this.usersService.getUserById(id) as PublicUser;
+  async verifyUserRefreshToken(
+    id: string,
+    refreshToken: string,
+  ): Promise<PublicUser> {
+    const user = (await this.usersService.getUserById(id)) as PublicUser;
 
     const authenticated = await this.cryptoService.validateRefreshToken(
       refreshToken,
@@ -54,7 +54,7 @@ export class AuthService {
     return await this.usersService.createUser(registerUserDto);
   }
 
-  async login(user: PublicUser, response: Response) : Promise<void> {
+  async login(user: PublicUser): Promise<any> {
     const accessTokenExpires = new Date();
     accessTokenExpires.setMilliseconds(
       accessTokenExpires.getTime() +
@@ -98,21 +98,30 @@ export class AuthService {
       refreshToken: await this.cryptoService.hashRefeshToken(refreshToken),
     });
 
-    // update user's tokenVersion in database to invalidate older version of refreshToken 
+    // update user's tokenVersion in database to invalidate older version of refreshToken
     this.usersService.updateUserById(user.id, {
       tokenVersion: user.tokenVersion + 1,
     });
-    
-    response.cookie('Authentication', accessToken, {
-      httpOnly: true,
-      expires: accessTokenExpires,
-      secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
-    });
 
-    response.cookie('Refresh', refreshToken, {
-      httpOnly: true,
-      expires: refreshTokenExpires,
-      secure: this.configService.getOrThrow<string>('NODE_ENV') === 'production',
-    });
+    return {
+      accessToken,
+      accessTokenExpires: accessTokenExpires.toISOString(), // need to convert date to ISO string since TCP packets cannot serialize Date objects
+      refreshToken,
+      refreshTokenExpires: refreshTokenExpires.toISOString(), // need to convert date to ISO string since TCP packets cannot serialize Date objects
+    };
+
+    // response.cookie('Authentication', accessToken, {
+    //   httpOnly: true,
+    //   expires: accessTokenExpires,
+    //   secure:
+    //     this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+    // });
+
+    // response.cookie('Refresh', refreshToken, {
+    //   httpOnly: true,
+    //   expires: refreshTokenExpires,
+    //   secure:
+    //     this.configService.getOrThrow<string>('NODE_ENV') === 'production',
+    // });
   }
 }
