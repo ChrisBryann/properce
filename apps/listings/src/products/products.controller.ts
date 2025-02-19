@@ -9,7 +9,10 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @MessagePattern({ cmd: 'createProduct' })
-  async create(@Payload('userId') userId: string, @Payload('createProductDto') createProductDto: CreateProductDto) {
+  async create(
+    @Payload('userId') userId: string,
+    @Payload('createProductDto') createProductDto: CreateProductDto,
+  ) {
     return await this.productsService.create(userId, createProductDto);
   }
 
@@ -24,7 +27,11 @@ export class ProductsController {
   }
 
   @MessagePattern({ cmd: 'updateProductById' })
-  async update(@Payload('userId') userId: string, @Payload('id') id: string, @Payload('updateProductDto') updateProductDto: UpdateProductDto) {
+  async update(
+    @Payload('userId') userId: string,
+    @Payload('id') id: string,
+    @Payload('updateProductDto') updateProductDto: UpdateProductDto,
+  ) {
     return await this.productsService.update(userId, id, updateProductDto);
   }
 

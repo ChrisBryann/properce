@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Inject,
-  Post,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Res } from '@nestjs/common';
 import { PublicUser } from 'apps/users/src/entities/user.entity';
 import { Response } from 'express';
 import { ClientProxy } from '@nestjs/microservices';

@@ -7,9 +7,9 @@ import { User } from 'apps/users/src/entities/user.entity';
 import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module';
 
 @Module({
-  imports: [AuthGatewayModule, TypeOrmModule.forFeature([Product, User])],
+  imports: [TypeOrmModule.forFeature([Product, User])],
   controllers: [ProductsController],
   providers: [ProductsService],
-  exports: [ProductsService, AuthGatewayModule],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

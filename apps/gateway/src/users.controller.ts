@@ -25,8 +25,8 @@ export class UsersController {
 
   @Get()
   async getAllUsers(): Promise<PublicUser[]> {
-    return firstValueFrom(
-      await this.usersMicroservice.send({ cmd: 'getAllUsers' }, {}),
+    return await firstValueFrom(
+      this.usersMicroservice.send({ cmd: 'getAllUsers' }, {}),
     );
   }
 
@@ -34,8 +34,8 @@ export class UsersController {
   async getCurrentUser(
     @CurrentUserDecorator() user: PublicUser,
   ): Promise<User | PublicUser> {
-    return firstValueFrom(
-      await this.usersMicroservice.send(
+    return await firstValueFrom(
+      this.usersMicroservice.send(
         { cmd: 'getUserById' },
         {
           id: user.id,
@@ -49,8 +49,8 @@ export class UsersController {
     @CurrentUserDecorator() user: PublicUser,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<PublicUser> {
-    return firstValueFrom(
-      await this.usersMicroservice.send(
+    return await firstValueFrom(
+      this.usersMicroservice.send(
         { cmd: 'updateUserById' },
         {
           id: user.id,
@@ -64,10 +64,16 @@ export class UsersController {
   async deleteCurrentUser(
     @CurrentUserDecorator() user: PublicUser,
   ): Promise<void> {
-    await this.usersMicroservice.send(
-      { cmd: 'deleteUserById' },
+    return await firstValueFrom(
+      this.usersMicroservice.send(
+        { cmd: 'deleteUserById' },
+        {
+          id: user.id,
+        },
+      ),
       {
-        id: user.id,
+        defaultValue: null, // since deleteUserById tcp route doesn't return anything when successful, firstValueFrom rejects and throws error because nothing is returned
+        // therefore, set defaultValue to null so that it returns nothing to user and gives 201 OK
       },
     );
   }
@@ -76,8 +82,8 @@ export class UsersController {
   async getUserById(
     @Param('userId') userId: string,
   ): Promise<User | PublicUser> {
-    return firstValueFrom(
-      await this.usersMicroservice.send(
+    return await firstValueFrom(
+      this.usersMicroservice.send(
         { cmd: 'getUserById' },
         {
           id: userId,
@@ -91,8 +97,8 @@ export class UsersController {
     @Param('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<PublicUser> {
-    return firstValueFrom(
-      await this.usersMicroservice.send(
+    return await firstValueFrom(
+      this.usersMicroservice.send(
         { cmd: 'updateUserById' },
         {
           id: userId,
@@ -104,10 +110,16 @@ export class UsersController {
 
   @Delete('/:userId')
   async deleteUserById(@Param('userId') userId: string): Promise<void> {
-    await this.usersMicroservice.send(
-      { cmd: 'deleteUserById' },
+    return await firstValueFrom(
+      this.usersMicroservice.send(
+        { cmd: 'deleteUserById' },
+        {
+          id: userId,
+        },
+      ),
       {
-        id: userId,
+        defaultValue: null, // since deleteUserById tcp route doesn't return anything when successful, firstValueFrom rejects and throws error because nothing is returned
+        // therefore, set defaultValue to null so that it returns nothing to user and gives 201 OK
       },
     );
   }

@@ -2,11 +2,9 @@ import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nes
 import { ListingsService } from './listings.service';
 import { CurrentUserDecorator } from 'apps/auth/src/decorators/current-user.decorator';
 import { PublicUser } from 'apps/users/src/entities/user.entity';
-import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 
-@UseGuards(AuthGatewayGuard)
 @Controller('listings')
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}
