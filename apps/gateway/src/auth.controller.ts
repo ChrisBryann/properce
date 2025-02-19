@@ -5,19 +5,19 @@ import {
   Inject,
   Post,
   Res,
-  UseGuards,
 } from '@nestjs/common';
-import { PublicUser, User } from 'apps/users/src/entities/user.entity';
+import { PublicUser } from 'apps/users/src/entities/user.entity';
 import { Response } from 'express';
 import { ClientProxy } from '@nestjs/microservices';
 import { RegisterUserDto } from 'apps/auth/src/dtos/register-user.dto';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+import { AUTH_MICROSERVICE } from './gateway.constant';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    @Inject('AUTH_SERVICE') private readonly authMicroservice: ClientProxy,
+    @Inject(AUTH_MICROSERVICE) private readonly authMicroservice: ClientProxy,
     private readonly configService: ConfigService,
   ) {}
 

@@ -4,6 +4,18 @@ import { GatewayService } from './gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
+import {
+  AUTH_MICROSERVICE,
+  COMMITMENTS_MICROSERVICE,
+  LISTINGS_MICROSERVICE,
+  NOTIFICATIONS_MICROSERVICE,
+  ORDERS_MICROSERVICE,
+  PAYMENTS_MICROSERVICE,
+  USERS_MICROSERVICE,
+} from './gateway.constant';
+import { UsersController } from './users.controller';
+import { ProductsController } from './products.controller';
+import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module';
 
 @Module({
   imports: [
@@ -13,7 +25,7 @@ import { AuthController } from './auth.controller';
     }),
     ClientsModule.registerAsync([
       {
-        name: 'AUTH_SERVICE',
+        name: AUTH_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -24,7 +36,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'COMMITMENTS_SERVICE',
+        name: COMMITMENTS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -35,7 +47,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'LISTINGS_SERVICE',
+        name: LISTINGS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -46,7 +58,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'NOTIFICATIONS_SERVICE',
+        name: NOTIFICATIONS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -57,7 +69,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'ORDERS_SERVICE',
+        name: ORDERS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -68,7 +80,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'PAYMENTS_SERVICE',
+        name: PAYMENTS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -79,7 +91,7 @@ import { AuthController } from './auth.controller';
         }),
       },
       {
-        name: 'USERS_SERVICE',
+        name: USERS_MICROSERVICE,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
@@ -90,8 +102,14 @@ import { AuthController } from './auth.controller';
         }),
       },
     ]),
+    AuthGatewayModule,
   ],
-  controllers: [GatewayController, AuthController],
+  controllers: [
+    GatewayController,
+    AuthController,
+    UsersController,
+    ProductsController,
+  ],
   providers: [GatewayService],
 })
 export class GatewayModule {}
