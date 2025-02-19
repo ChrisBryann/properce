@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -13,16 +14,23 @@ import { PublicUser } from 'apps/users/src/entities/user.entity';
 import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
 import { CreateListingDto } from 'apps/listings/src/dto/create-listing.dto';
 import { UpdateListingDto } from 'apps/listings/src/dto/update-listing.dto';
-import { ListingsService } from 'apps/listings/src/listings.service';
+import { LISTINGS_MICROSERVICE } from './gateway.constant';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @UseGuards(AuthGatewayGuard)
 @Controller('listings')
 export class ListingsController {
-  constructor(private readonly listingsService: ListingsService) {}
+  constructor(
+    @Inject(LISTINGS_MICROSERVICE)
+    private readonly listingsMicroservice: ClientProxy,
+  ) {}
 
   @Get('hello')
-  getHello(): string {
-    return this.listingsService.getHello();
+  async getHello(): Promise<string> {
+    return await firstValueFrom(
+      this.listingsMicroservice.send({ cmd: 'getHello' }, {}),
+    );
   }
 
   @Post()
@@ -30,12 +38,27 @@ export class ListingsController {
     @CurrentUserDecorator() user: PublicUser,
     @Body() createListingDto: CreateListingDto,
   ) {
-    return await this.listingsService.create(user.id, createListingDto);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        { cmd: 'createListing' },
+        {
+          userId: user.id,
+          createListingDto,
+        },
+      ),
+    );
   }
 
   @Get()
   async findAll(@CurrentUserDecorator() user: PublicUser) {
-    return await this.listingsService.findAll(user.id);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        { cmd: 'getAllListings' },
+        {
+          userId: user.id,
+        },
+      ),
+    );
   }
 
   @Get(':id')
@@ -43,7 +66,14 @@ export class ListingsController {
     @CurrentUserDecorator() user: PublicUser,
     @Param('id') id: string,
   ) {
-    return await this.listingsService.findOne(id);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        { cmd: 'getListingById' },
+        {
+          id,
+        },
+      ),
+    );
   }
 
   @Put(':id')
@@ -52,7 +82,18 @@ export class ListingsController {
     @Param('id') id: string,
     @Body() updateListingDto: UpdateListingDto,
   ) {
-    return await this.listingsService.update(user.id, id, updateListingDto);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        {
+          cmd: 'updateListingById',
+        },
+        {
+          userId: user.id,
+          id,
+          updateListingDto,
+        },
+      ),
+    );
   }
 
   @Delete(':id')
@@ -60,7 +101,20 @@ export class ListingsController {
     @CurrentUserDecorator() user: PublicUser,
     @Param('id') id: string,
   ) {
-    return await this.listingsService.remove(user.id, id);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        {
+          cmd: 'deleteListingById',
+        },
+        {
+          userId: user.id,
+          id,
+        },
+      ),
+      {
+        defaultValue: null,
+      },
+    );
   }
 
   @Put(':id/close')
@@ -68,6 +122,19 @@ export class ListingsController {
     @CurrentUserDecorator() user: PublicUser,
     @Param('id') id: string,
   ) {
-    await this.listingsService.closeListing(user.id, id);
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        {
+          cmd: 'closeListingById',
+        },
+        {
+          userId: user.id,
+          id,
+        },
+      ),
+      {
+        defaultValue: null,
+      },
+    );
   }
 }

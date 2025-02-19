@@ -2,6 +2,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -9,6 +10,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 
 @Injectable()
 export class HttpInterceptor implements NestInterceptor {
+  private readonly logger: Logger = new Logger(HttpInterceptor.name);
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       catchError((err) => {
@@ -30,7 +32,7 @@ export class HttpInterceptor implements NestInterceptor {
         //   statusCode: err.status,
         //   message: err.response.message,
         // });
-        console.log(err);
+        this.logger.error(err);
 
         return throwError(
           () =>

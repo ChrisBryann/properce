@@ -1,37 +1,62 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { CommitmentsService } from './commitments.service';
-import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
-import { CurrentUserDecorator } from 'apps/auth/src/decorators/current-user.decorator';
-import { PublicUser } from 'apps/users/src/entities/user.entity';
 import { CreateCommitmentDto } from './dto/create-commitment.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
-@UseGuards(AuthGatewayGuard)
 @Controller('commitments')
 export class CommitmentsController {
   constructor(private readonly commitmentsService: CommitmentsService) {}
 
-  @Get()
+  @MessagePattern({ cmd: 'getHello' })
   getHello(): string {
     return this.commitmentsService.getHello();
   }
 
-  @Post()
-  async create(@CurrentUserDecorator() user: PublicUser, @Body() createCommitmentDto: CreateCommitmentDto) {
-    return await this.commitmentsService.create(user.id, createCommitmentDto);
-  } 
-
-  @Get(':listingId') // for seller and admins
-  async findAllByListingId(@CurrentUserDecorator() user: PublicUser, @Param('listingId') listingId: string) {
-    return await this.commitmentsService.findAllByListingId(user.id, listingId);
+  @MessagePattern({ cmd: 'createCommitment' })
+  async create(
+    @Payload('userId') userId: string,
+    @Payload('createCommitmentDto') createCommitmentDto: CreateCommitmentDto,
+  ) {
+    return await this.commitmentsService.create(userId, createCommitmentDto);
   }
 
-  @Get('status/:listingId') // for seller and admins
-  async getAggregatedDataByListingId(@CurrentUserDecorator() user: PublicUser, @Param('listingId') listingId: string) {
-    return await this.commitmentsService.getAggregatedDataByListingId(user.id, listingId);
+  @MessagePattern({ cmd: 'findAllByListingId' })
+  async findAllByListingId(
+    @Payload('userId') userId: string,
+    @Payload('listingId') listingId: string,
+  ) {
+    return await this.commitmentsService.findAllByListingId(userId, listingId);
   }
 
-  @Put(':id/cancel')
-  async cancelCommitment(@CurrentUserDecorator() user: PublicUser, @Param('id') id: string) {
-    return await this.commitmentsService.cancelCommitment(user.id, id);
+  @MessagePattern({ cmd: 'findCommitmentById' })
+  async getCommitmentById(@Payload('id') id: string) {
+    return await this.commitmentsService.findOne(id);
+  }
+
+  @MessagePattern({ cmd: 'getAggregatedDataByListingId' })
+  async getAggregatedDataByListingId(
+    @Payload('userId') userId: string,
+    @Payload('listingId') listingId: string,
+  ) {
+    return await this.commitmentsService.getAggregatedDataByListingId(
+      userId,
+      listingId,
+    );
+  }
+
+  @MessagePattern({ cmd: 'updateCommitment' })
+  async updateCommitment(
+    @Payload('id') id: string,
+    @Payload('quantity') quantity: number,
+  ) {
+    return await this.commitmentsService.updateCommitment(id, quantity);
+  }
+
+  @MessagePattern({ cmd: 'cancelCommitment' })
+  async cancelCommitment(
+    @Payload('userId') userId: string,
+    @Payload('id') id: string,
+  ) {
+    await this.commitmentsService.cancelCommitment(userId, id);
   }
 }

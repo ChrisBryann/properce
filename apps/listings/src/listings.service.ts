@@ -25,7 +25,7 @@ export class ListingsService {
     // find the product from productId and confirm if it's from the same seller
     try {
       await this.productService.findOne(sellerId, createListingDto.productId);
-    } catch (error) {
+    } catch {
       throw new ForbiddenException(
         'Product in this listing does not belong to this seller!',
       );
@@ -145,7 +145,7 @@ export class ListingsService {
   ) {
     await this.findOne(id);
 
-    return await this.productListingRepository.update(
+    await this.productListingRepository.update(
       {
         id,
       },
@@ -158,6 +158,8 @@ export class ListingsService {
         }),
       },
     );
+
+    return this.findOne(id);
   }
 
   async remove(sellerId: string, id: string) {
@@ -173,6 +175,9 @@ export class ListingsService {
   }
 
   async closeListing(sellerId: string, id: string) {
+    // check if listing exist in database
+    await this.findOne(id);
+    // if exist, close the listing
     await this.listingQueue.add(
       'closeListing',
       {

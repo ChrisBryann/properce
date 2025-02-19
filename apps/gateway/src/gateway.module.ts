@@ -16,6 +16,8 @@ import {
 import { UsersController } from './users.controller';
 import { ProductsController } from './products.controller';
 import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module';
+import { ListingsController } from './listings.controller';
+import { CommitmentsController } from './commitments.controller';
 
 @Module({
   imports: [
@@ -109,6 +111,8 @@ import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module'
     AuthController,
     UsersController,
     ProductsController,
+    ListingsController,
+    CommitmentsController,
   ],
   providers: [GatewayService],
 })

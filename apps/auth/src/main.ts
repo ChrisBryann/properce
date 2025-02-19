@@ -23,6 +23,6 @@ async function bootstrap() {
     { inheritAppConfig: true }, // allows Global Pipes, Filters, and Interceptors in hybrid application (microservices with Rpc)
   );
   await app.startAllMicroservices();
-  await app.listen(process.env.port ?? 3000);
+  // await app.listen(process.env.port ?? 3000);
 }
 bootstrap();

@@ -14,6 +14,7 @@ import { PublicUser } from 'apps/users/src/entities/user.entity';
 import { CreateCommitmentDto } from 'apps/commitments/src/dto/create-commitment.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { UpdateCommitmentDto } from 'apps/commitments/src/dto/update-commitment.dto';
 
 @UseGuards(AuthGatewayGuard)
 @Controller('commitments')
@@ -46,16 +47,31 @@ export class CommitmentsController {
     );
   }
 
-  @Get(':listingId') // for seller and admins
+  @Get('/listing/:listingId') // for seller and admins
   async findAllByListingId(
     @CurrentUserDecorator() user: PublicUser,
     @Param('listingId') listingId: string,
   ) {
     return await firstValueFrom(
-      this.commitmentsMicroservice.send('findAllByListingId', {
-        userId: user.id,
-        listingId,
-      }),
+      this.commitmentsMicroservice.send(
+        { cmd: 'findAllByListingId' },
+        {
+          userId: user.id,
+          listingId,
+        },
+      ),
+    );
+  }
+
+  @Get(':id')
+  async findCommitmentById(@Param('id') id: string) {
+    return await firstValueFrom(
+      this.commitmentsMicroservice.send(
+        { cmd: 'findCommitmentById' },
+        {
+          id,
+        },
+      ),
     );
   }
 
@@ -65,10 +81,32 @@ export class CommitmentsController {
     @Param('listingId') listingId: string,
   ) {
     return await firstValueFrom(
-      this.commitmentsMicroservice.send('getAggregatedDataByListingId', {
-        userId: user.id,
-        listingId,
-      }),
+      this.commitmentsMicroservice.send(
+        { cmd: 'getAggregatedDataByListingId' },
+        {
+          userId: user.id,
+          listingId,
+        },
+      ),
+      {
+        defaultValue: null,
+      },
+    );
+  }
+
+  @Put(':id') // for buyer and admins only
+  async updateCommitment(
+    @Param('id') id: string,
+    @Body() updateCommitmentDto: UpdateCommitmentDto,
+  ) {
+    return await firstValueFrom(
+      this.commitmentsMicroservice.send(
+        { cmd: 'updateCommitment' },
+        {
+          id,
+          quantity: updateCommitmentDto.quantity,
+        },
+      ),
     );
   }
 
@@ -78,10 +116,16 @@ export class CommitmentsController {
     @Param('id') id: string,
   ) {
     return await firstValueFrom(
-      this.commitmentsMicroservice.send('cancelCommitment', {
-        userId: user.id,
-        id,
-      }),
+      this.commitmentsMicroservice.send(
+        { cmd: 'cancelCommitment' },
+        {
+          userId: user.id,
+          id,
+        },
+      ),
+      {
+        defaultValue: null,
+      },
     );
   }
 }

@@ -1,12 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ListingsModule } from './listings.module';
-import { ValidationPipe } from '@nestjs/common';
 import { TcpOptions, Transport } from '@nestjs/microservices';
 import { HttpInterceptor } from '@app/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(ListingsModule);
-  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new HttpInterceptor());
   app.connectMicroservice<TcpOptions>(
     {
@@ -21,6 +19,6 @@ async function bootstrap() {
     },
   );
   await app.startAllMicroservices();
-  await app.listen(process.env.port ?? 3000);
+  // await app.listen(process.env.port ?? 3000);
 }
 bootstrap();
