@@ -1,6 +1,6 @@
 import { DefaultEntity } from '@app/common/database/default.entity';
 import { OrderStatus } from '@app/common/enums/order-status.enum';
-import { ProductListing } from 'apps/listings/src/entities/product-listing.entity';
+import { Commitment } from 'apps/commitments/src/entities/commitment.entity';
 import { User } from 'apps/users/src/entities/user.entity';
 import {
   Column,
@@ -15,12 +15,12 @@ export class Order extends DefaultEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne((type) => ProductListing, {
+  @ManyToOne((type) => Commitment, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  listing: ProductListing;
+  commitment: Commitment; // each order is tied to a commitment request
 
   @ManyToOne((type) => User, {
     onDelete: 'CASCADE',

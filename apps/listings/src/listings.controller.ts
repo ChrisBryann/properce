@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('listings')
 export class ListingsController {
@@ -51,5 +51,10 @@ export class ListingsController {
     @Payload('id') id: string,
   ) {
     await this.listingsService.closeListing(userId, id);
+  }
+
+  @EventPattern('closeExpiredListing')
+  async closeExpiredListing(@Payload('id') id: string) {
+    await this.listingsService.closeExpiredListing(id);
   }
 }

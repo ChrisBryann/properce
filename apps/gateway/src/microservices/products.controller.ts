@@ -1,49 +1,42 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Inject,
-  Param,
   Post,
+  Body,
+  Param,
+  Delete,
   Put,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
+import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
 import { CurrentUserDecorator } from 'apps/auth/src/decorators/current-user.decorator';
 import { PublicUser } from 'apps/users/src/entities/user.entity';
-import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
-import { CreateListingDto } from 'apps/listings/src/dto/create-listing.dto';
-import { UpdateListingDto } from 'apps/listings/src/dto/update-listing.dto';
-import { LISTINGS_MICROSERVICE } from './gateway.constant';
+import { LISTINGS_MICROSERVICE } from '../gateway.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { CreateProductDto } from 'apps/listings/src/products/dto/create-product.dto';
+import { UpdateProductDto } from 'apps/listings/src/products/dto/update-product.dto';
 
 @UseGuards(AuthGatewayGuard)
-@Controller('listings')
-export class ListingsController {
+@Controller('products')
+export class ProductsController {
   constructor(
     @Inject(LISTINGS_MICROSERVICE)
     private readonly listingsMicroservice: ClientProxy,
   ) {}
 
-  @Get('hello')
-  async getHello(): Promise<string> {
-    return await firstValueFrom(
-      this.listingsMicroservice.send({ cmd: 'getHello' }, {}),
-    );
-  }
-
   @Post()
   async create(
     @CurrentUserDecorator() user: PublicUser,
-    @Body() createListingDto: CreateListingDto,
+    @Body() createProductDto: CreateProductDto,
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'createListing' },
+        { cmd: 'createProduct' },
         {
           userId: user.id,
-          createListingDto,
+          createProductDto,
         },
       ),
     );
@@ -53,7 +46,7 @@ export class ListingsController {
   async findAll(@CurrentUserDecorator() user: PublicUser) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'getAllListings' },
+        { cmd: 'getAllProducts' },
         {
           userId: user.id,
         },
@@ -68,8 +61,9 @@ export class ListingsController {
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'getListingById' },
+        { cmd: 'getProductById' },
         {
+          userId: user.id,
           id,
         },
       ),
@@ -80,17 +74,15 @@ export class ListingsController {
   async update(
     @CurrentUserDecorator() user: PublicUser,
     @Param('id') id: string,
-    @Body() updateListingDto: UpdateListingDto,
+    @Body() updateProductDto: UpdateProductDto,
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        {
-          cmd: 'updateListingById',
-        },
+        { cmd: 'updateProductById' },
         {
           userId: user.id,
           id,
-          updateListingDto,
+          updateProductDto,
         },
       ),
     );
@@ -103,37 +95,15 @@ export class ListingsController {
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        {
-          cmd: 'deleteListingById',
-        },
+        { cmd: 'deleteProductById' },
         {
           userId: user.id,
           id,
         },
       ),
       {
-        defaultValue: null,
-      },
-    );
-  }
-
-  @Put(':id/close')
-  async closeListing(
-    @CurrentUserDecorator() user: PublicUser,
-    @Param('id') id: string,
-  ) {
-    return await firstValueFrom(
-      this.listingsMicroservice.send(
-        {
-          cmd: 'closeListingById',
-        },
-        {
-          userId: user.id,
-          id,
-        },
-      ),
-      {
-        defaultValue: null,
+        defaultValue: null, // since deleteProductById tcp route doesn't return anything when successful, firstValueFrom rejects and throws error because nothing is returned
+        // therefore, set defaultValue to null so that it returns nothing to user and gives 201 OK
       },
     );
   }

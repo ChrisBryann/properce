@@ -12,7 +12,7 @@ import { CurrentUserDecorator } from 'apps/auth/src/decorators/current-user.deco
 import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
 import { PublicUser, User } from 'apps/users/src/entities/user.entity';
 import { UpdateUserDto } from 'apps/users/src/dtos/update-user.dto';
-import { USERS_MICROSERVICE } from './gateway.constant';
+import { USERS_MICROSERVICE } from '../gateway.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 

@@ -51,7 +51,7 @@ export class ProductListing extends DefaultEntity {
     scale: 2,
     nullable: true,
   })
-  finalPrice?: string;
+  finalPrice?: number;
 
   @Column({
     type: 'boolean',

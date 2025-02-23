@@ -3,7 +3,7 @@ import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthController } from './auth.controller';
+import { AuthController } from './microservices/auth.controller';
 import {
   AUTH_MICROSERVICE,
   COMMITMENTS_MICROSERVICE,
@@ -13,11 +13,15 @@ import {
   PAYMENTS_MICROSERVICE,
   USERS_MICROSERVICE,
 } from './gateway.constant';
-import { UsersController } from './users.controller';
-import { ProductsController } from './products.controller';
 import { AuthGatewayModule } from '@app/common/auth-gateway/auth-gateway.module';
-import { ListingsController } from './listings.controller';
-import { CommitmentsController } from './commitments.controller';
+import {
+  CommitmentsController,
+  ListingsController,
+  ProductsController,
+  UsersController,
+} from './microservices';
+import { BmqModule } from '@app/common/bullmq/bullmq.module';
+import { ListingsConsumer } from './consumers';
 
 @Module({
   imports: [
@@ -105,6 +109,7 @@ import { CommitmentsController } from './commitments.controller';
       },
     ]),
     AuthGatewayModule,
+    BmqModule,
   ],
   controllers: [
     GatewayController,
@@ -114,6 +119,6 @@ import { CommitmentsController } from './commitments.controller';
     ListingsController,
     CommitmentsController,
   ],
-  providers: [GatewayService],
+  providers: [GatewayService, ListingsConsumer],
 })
 export class GatewayModule {}

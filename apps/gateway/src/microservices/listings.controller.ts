@@ -1,42 +1,49 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
   Put,
   UseGuards,
-  Inject,
 } from '@nestjs/common';
-import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
 import { CurrentUserDecorator } from 'apps/auth/src/decorators/current-user.decorator';
 import { PublicUser } from 'apps/users/src/entities/user.entity';
-import { LISTINGS_MICROSERVICE } from './gateway.constant';
+import { AuthGatewayGuard } from '@app/common/auth-gateway/auth-gateway.guard';
+import { CreateListingDto } from 'apps/listings/src/dto/create-listing.dto';
+import { UpdateListingDto } from 'apps/listings/src/dto/update-listing.dto';
+import { LISTINGS_MICROSERVICE } from '../gateway.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CreateProductDto } from 'apps/listings/src/products/dto/create-product.dto';
-import { UpdateProductDto } from 'apps/listings/src/products/dto/update-product.dto';
 
 @UseGuards(AuthGatewayGuard)
-@Controller('products')
-export class ProductsController {
+@Controller('listings')
+export class ListingsController {
   constructor(
     @Inject(LISTINGS_MICROSERVICE)
     private readonly listingsMicroservice: ClientProxy,
   ) {}
 
+  @Get('hello')
+  async getHello(): Promise<string> {
+    return await firstValueFrom(
+      this.listingsMicroservice.send({ cmd: 'getHello' }, {}),
+    );
+  }
+
   @Post()
   async create(
     @CurrentUserDecorator() user: PublicUser,
-    @Body() createProductDto: CreateProductDto,
+    @Body() createListingDto: CreateListingDto,
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'createProduct' },
+        { cmd: 'createListing' },
         {
           userId: user.id,
-          createProductDto,
+          createListingDto,
         },
       ),
     );
@@ -46,7 +53,7 @@ export class ProductsController {
   async findAll(@CurrentUserDecorator() user: PublicUser) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'getAllProducts' },
+        { cmd: 'getAllListings' },
         {
           userId: user.id,
         },
@@ -61,9 +68,8 @@ export class ProductsController {
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'getProductById' },
+        { cmd: 'getListingById' },
         {
-          userId: user.id,
           id,
         },
       ),
@@ -74,15 +80,17 @@ export class ProductsController {
   async update(
     @CurrentUserDecorator() user: PublicUser,
     @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
+    @Body() updateListingDto: UpdateListingDto,
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'updateProductById' },
+        {
+          cmd: 'updateListingById',
+        },
         {
           userId: user.id,
           id,
-          updateProductDto,
+          updateListingDto,
         },
       ),
     );
@@ -95,15 +103,37 @@ export class ProductsController {
   ) {
     return await firstValueFrom(
       this.listingsMicroservice.send(
-        { cmd: 'deleteProductById' },
+        {
+          cmd: 'deleteListingById',
+        },
         {
           userId: user.id,
           id,
         },
       ),
       {
-        defaultValue: null, // since deleteProductById tcp route doesn't return anything when successful, firstValueFrom rejects and throws error because nothing is returned
-        // therefore, set defaultValue to null so that it returns nothing to user and gives 201 OK
+        defaultValue: null,
+      },
+    );
+  }
+
+  @Put(':id/close')
+  async closeListing(
+    @CurrentUserDecorator() user: PublicUser,
+    @Param('id') id: string,
+  ) {
+    return await firstValueFrom(
+      this.listingsMicroservice.send(
+        {
+          cmd: 'closeListingById',
+        },
+        {
+          userId: user.id,
+          id,
+        },
+      ),
+      {
+        defaultValue: null,
       },
     );
   }

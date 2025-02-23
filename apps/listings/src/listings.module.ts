@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { BmqModule } from '@app/common/bullmq/bullmq.module';
 import { LISTING_BMQ } from '@app/common/bullmq/bullmq.constant';
-import { ListingConsumer } from './listings.consumer';
 import { CommitmentsModule } from 'apps/commitments/src/commitments.module';
 
 @Module({
@@ -24,6 +23,6 @@ import { CommitmentsModule } from 'apps/commitments/src/commitments.module';
     CommitmentsModule,
   ],
   controllers: [ListingsController],
-  providers: [ListingsService, ListingConsumer],
+  providers: [ListingsService],
 })
 export class ListingsModule {}
